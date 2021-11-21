@@ -18,6 +18,7 @@ import Button from '../components/Button';
 // ];
 
 const Home = ({ navigation, route }) => {
+  const newColorPalette = route.params?.newColorPalette;
   const [colorPalettes, setColorPalettes] = useState([]);
   const [isRefreshing, setIsRefreshing] = useState(false);
 
@@ -36,6 +37,12 @@ const Home = ({ navigation, route }) => {
     fetchColorPalettes();
   }, []);
 
+  useEffect(() => {
+    if (newColorPalette) {
+      setColorPalettes(prevPalettes => [newColorPalette, ...prevPalettes]);
+    }
+  }, [newColorPalette]);
+
   const handleRefresh = useCallback(async () => {
     setIsRefreshing(true);
     await fetchColorPalettes();
@@ -46,7 +53,7 @@ const Home = ({ navigation, route }) => {
     <View>
       <FlatList
         data={colorPalettes}
-        keyExtractor={item => item.paletteName}
+        keyExtractor={(item, index) => item.paletteName + index}
         renderItem={({ item }) => (
           <Button
             paletteName={item.paletteName}
@@ -59,7 +66,7 @@ const Home = ({ navigation, route }) => {
         ListHeaderComponent={
           <TouchableOpacity
             onPress={() => {
-              navigation.navigate('ColorPaletteModal', { setColorPalettes });
+              navigation.navigate('ColorPaletteModal');
             }}>
             <Text style={styles.ButtonText}>Add a color scheme</Text>
           </TouchableOpacity>
@@ -72,7 +79,7 @@ const Home = ({ navigation, route }) => {
 const styles = StyleSheet.create({
   ButtonText: {
     fontSize: 20,
-    color: 'blue',
+    color: 'teal',
     fontWeight: 'bold',
     padding: 10,
   },

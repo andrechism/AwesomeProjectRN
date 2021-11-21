@@ -7,67 +7,80 @@ import {
   StyleSheet,
   FlatList,
   TouchableOpacity,
+  Alert,
 } from 'react-native';
 import ColorSquare from '../components/ColorSquare';
 import { COLORS } from '../utils/colorList';
 
-const ColorSwitch = ({ colorData, setSelectedColors }) => {
-  const [isActive, setIsActive] = useState(false);
-  const { colorName, hexCode } = colorData;
+// const ColorSwitch = ({ colorData, setSelectedColors }) => {
+//   const [isActive, setIsActive] = useState(false);
+//   const { colorName, hexCode } = colorData;
 
-  const handleSelection = useCallback(() => {
-    setSelectedColors(prevSelectedColors => {
-      if (isActive) {
-        return [...prevSelectedColors, colorData];
-      } else {
-        return prevSelectedColors.filter(item => item.hexCode !== hexCode);
-      }
-    });
-  }, [isActive]);
+//   const handleSelection = useCallback(() => {
+//     setSelectedColors(prevSelectedColors => {
+//       if (isActive) {
+//         return [...prevSelectedColors, colorData];
+//       } else {
+//         return prevSelectedColors.filter(item => item.hexCode !== hexCode);
+//       }
+//     });
+//   }, [isActive]);
 
-  useEffect(() => {
-    handleSelection();
-  }, [isActive]);
+//   useEffect(() => {
+//     handleSelection();
+//   }, [isActive]);
 
-  return (
-    <View style={styles.ColorSwitchItem}>
-      <ColorSquare hexCode={hexCode} />
-      <Text>{colorName}</Text>
+//   return (
+//     <View style={styles.ColorSwitchItem}>
+//       <ColorSquare hexCode={hexCode} />
+//       <Text style={styles.ColorSwitchItemText}>{colorName}</Text>
 
-      <Switch
-        style={styles.ColorSwitch}
-        value={isActive}
-        onValueChange={setIsActive}
-      />
-    </View>
-  );
-};
+//       <Switch
+//         style={styles.ColorSwitch}
+//         value={isActive}
+//         onValueChange={setIsActive}
+//       />
+//     </View>
+//   );
+// };
 
 const ColorPaletteModal = ({ navigation, route }) => {
   const [paletteName, setPaletteName] = useState('');
   const [selectedColors, setSelectedColors] = useState([]);
 
-  const { setColorPalettes } = route.params;
+  // const { setColorPalettes } = route.params;
 
   const handleSubmit = useCallback(() => {
     if (!paletteName) {
-      alert('Please enter a palette name');
+      Alert.alert('Please enter a palette name');
       return;
     }
     if (selectedColors.length < 3) {
-      alert('Please select at least three colors');
+      Alert.alert('Please select at least three colors');
       return;
     }
 
-    const newPalette = {
+    const newColorPalette = {
       paletteName,
       colors: selectedColors,
     };
 
-    setColorPalettes(prevColorPalettes => [newPalette, ...prevColorPalettes]);
+    // setColorPalettes(prevColorPalettes => [newPalette, ...prevColorPalettes]);
 
-    navigation.goBack();
+    navigation.navigate('Home', { newColorPalette });
+
+    // navigation.goBack();
   }, [paletteName, selectedColors]);
+
+  const handleValueChange = useCallback((value, color) => {
+    if (value) {
+      setSelectedColors(prevSelectedColors => [...prevSelectedColors, color]);
+    } else {
+      setSelectedColors(prevSelectedColors =>
+        prevSelectedColors.filter(item => item.colorName !== color.colorName),
+      );
+    }
+  }, []);
 
   return (
     <View>
@@ -77,6 +90,7 @@ const ColorPaletteModal = ({ navigation, route }) => {
         placeholder="Palette Name"
         value={paletteName}
         onChangeText={setPaletteName}
+        placeholderTextColor="gray"
       />
 
       <FlatList
@@ -84,7 +98,23 @@ const ColorPaletteModal = ({ navigation, route }) => {
         data={COLORS}
         keyExtractor={item => item.colorName + item.hexCode}
         renderItem={({ item }) => (
-          <ColorSwitch colorData={item} setSelectedColors={setSelectedColors} />
+          // <ColorSwitch colorData={item} setSelectedColors={setSelectedColors} />
+          <View style={styles.ColorSwitchItem}>
+            <ColorSquare hexCode={item.hexCode} />
+            <Text style={styles.ColorSwitchItemText}>{item.colorName}</Text>
+
+            <Switch
+              style={styles.ColorSwitch}
+              value={
+                !!selectedColors.find(
+                  color => color.colorName === item.colorName,
+                )
+              }
+              onValueChange={selected => {
+                handleValueChange(selected, item);
+              }}
+            />
+          </View>
         )}
       />
 
@@ -101,6 +131,7 @@ const styles = StyleSheet.create({
   TextInputTitle: {
     paddingHorizontal: 10,
     marginVertical: 5,
+    color: '#000',
   },
 
   TextInput: {
@@ -109,6 +140,7 @@ const styles = StyleSheet.create({
     borderColor: 'gray',
     paddingHorizontal: 10,
     marginHorizontal: 10,
+    color: '#000',
   },
 
   ColorSwitchItem: {
@@ -120,12 +152,16 @@ const styles = StyleSheet.create({
     borderBottomColor: '#ccc',
   },
 
+  ColorSwitchItemText: {
+    color: '#000',
+  },
+
   ColorSwitch: {
     marginLeft: 'auto',
   },
 
   SubmitButton: {
-    backgroundColor: '#0066ff',
+    backgroundColor: 'teal',
     height: 40,
     alignItems: 'center',
     justifyContent: 'center',
