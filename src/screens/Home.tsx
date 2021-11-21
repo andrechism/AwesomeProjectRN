@@ -1,5 +1,12 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { View, FlatList, RefreshControl } from 'react-native';
+import {
+  View,
+  FlatList,
+  RefreshControl,
+  TouchableOpacity,
+  Text,
+  StyleSheet,
+} from 'react-native';
 import Button from '../components/Button';
 
 // import { FRONTEND_MASTERS, SOLARIZED, RAINBOW } from '../utils/colorList';
@@ -10,7 +17,7 @@ import Button from '../components/Button';
 //   { paletteName: 'Frontend Masters', colors: FRONTEND_MASTERS },
 // ];
 
-const Home = ({ navigation }) => {
+const Home = ({ navigation, route }) => {
   const [colorPalettes, setColorPalettes] = useState([]);
   const [isRefreshing, setIsRefreshing] = useState(false);
 
@@ -49,9 +56,26 @@ const Home = ({ navigation }) => {
         )}
         refreshing={isRefreshing}
         onRefresh={handleRefresh}
+        ListHeaderComponent={
+          <TouchableOpacity
+            onPress={() => {
+              navigation.navigate('ColorPaletteModal', { setColorPalettes });
+            }}>
+            <Text style={styles.ButtonText}>Add a color scheme</Text>
+          </TouchableOpacity>
+        }
       />
     </View>
   );
 };
+
+const styles = StyleSheet.create({
+  ButtonText: {
+    fontSize: 20,
+    color: 'blue',
+    fontWeight: 'bold',
+    padding: 10,
+  },
+});
 
 export default Home;
